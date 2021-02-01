@@ -13,6 +13,7 @@ and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
 
 ### Benchmark result
 <img src=".benchmark/carla_sac.png" width = "800" height ="400" alt="carla_sac"/>
+
 + Result was run with seed `0`, mode `Lane`
 
 ### Installation
