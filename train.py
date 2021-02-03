@@ -66,12 +66,12 @@ def main():
         'desired_speed': 15,  # desired speed (m/s)
         'max_ego_spawn_times': 100,  # maximum times to spawn ego vehicle
     }
-    env = gym.make('carla-v0', params=params)
-    env.seed(args.seed)
-    env = ActionMappingWrapper(env)
+    eval_env = gym.make('carla-v0', params=params)
+    eval_env.seed(args.seed)
+    eval_env = ActionMappingWrapper(eval_env)
 
-    obs_dim = env.state_space.shape[0]
-    action_dim = env.action_space.shape[0]
+    obs_dim = eval_env.state_space.shape[0]
+    action_dim = eval_env.action_space.shape[0]
 
     # Initialize model, algorithm, agent, replay_memory
     model = CarlaModel(obs_dim, action_dim)
@@ -150,7 +150,7 @@ def main():
         if (total_steps + 1) // EVAL_EVERY_STEPS >= test_flag:
             while (total_steps + 1) // EVAL_EVERY_STEPS >= test_flag:
                 test_flag += 1
-            avg_reward = run_evaluate_episodes(agent, env, EVAL_EPISODES)
+            avg_reward = run_evaluate_episodes(agent, eval_env, EVAL_EPISODES)
             tensorboard.add_scalar('eval/episode_reward', avg_reward,
                                    total_steps)
             logger.info('Evaluation over: {} episodes, Reward: {}'.format(
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--localhost",
-        default='172.18.138.13:8765',
+        default='localhost:8080',
         help='localhost to provide carla environment')
     parser.add_argument("--env", default="carla-v0")
     parser.add_argument("--task_mode", default='Lane', help='mode of the task')

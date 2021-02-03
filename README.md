@@ -1,16 +1,17 @@
 # RL_CARLA
-## Carla_SAC Experiment
-Run SAC algorithm in Carla Environment with [PaddlePaddle](https://github.com/PaddlePaddle/Paddle)
-and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
-
-### SAC Algorithm
+## SAC in Carla simulator
+Based on [PARL](https://github.com/PaddlePaddle/PARL) and [PaddlePaddle](https://github.com/PaddlePaddle/Paddle), 
+a parallel version of SAC was implemented and achieved high performance in the CARLA environment.
 > Paper: SAC in [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor](https://arxiv.org/abs/1801.01290)
+
+### Carla simulator introduction
+Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/tag/0.9.6) to know more about Carla simulator.
 
 ### Benchmark result
 <img src=".benchmark/carla_sac.png" width = "800" height ="400" alt="carla_sac"/>
 <img src=".benchmark/Lane_bend.gif" width = "300" height ="200" alt="result"/>
 
-+ Result was run with seed `0`, mode `Lane`
++ Result was evaluated with seed `0`, mode `Lane`
 
 ## How to use
 ### Dependencies:
@@ -39,33 +40,31 @@ and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
     ```
 
 #### Start Training
-1. Enter the CARLA root folder, launch the CARLA server in different terminals 
-   with non-display mode
+1. Open another(new) terminals, enter the CARLA root folder and launch CARLA service. 
+   There are two modes to start the CARLA server: <br>
+   (1) non-display mode
     ```start env
-    $ DISPLAY= ./CarlaUE4.sh -opengl -carla-port=2020
     $ DISPLAY= ./CarlaUE4.sh -opengl -carla-port=2021
-    $ DISPLAY= ./CarlaUE4.sh -opengl -carla-port=2022
-    $ DISPLAY= ./CarlaUE4.sh -opengl -carla-port=2023
     ```
-   or with display mode
+   (2) display mode
    ```start_env
-   $ ./CarlaUE4.sh -windowed -carla-port=2023
+   $ ./CarlaUE4.sh -windowed -carla-port=2021
    ```
-   + Three environments(2020,2021,2022) for collecting data and training, 
-     one environment(2023) for evaluating.
+   + Start three CARLA services (ports: 2021,2023,2025) for collecting data and training, 
+     one service (port: 2027) for evaluating.
      
-2. Open a new terminal and start `PARL port` for parallelization by
+2. For parallel training, we can execute the following [xparl](https://parl.readthedocs.io/en/stable/parallel_training/setup.html) command to start a PARL cluster：
    ```Parallelization
-   $ xparl start --port 8765
+   $ xparl start --port 8080
    ```
-   checkout xparl connect --address in the terminal
+   check xparl cluster status by `$ xparl status`
 
-3. Enter the cloned repository
+3. Start training
    ```train
-   python train.py ----localhost [xparl address]
+   $ python train.py --localhost [xparl address]
    
    # Train for other settings
-   python train.py ----localhost [xparl address] --seed [int] --task_mode [mode]
+   $ python train.py --localhost [xparl address] --seed [int] --task_mode [mode]
    ```
 #### Load trained model
 ```

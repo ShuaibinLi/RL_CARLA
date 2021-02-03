@@ -8,10 +8,9 @@ from parl.utils import logger, tensorboard
 from parl.env.continuous_wrappers import ActionMappingWrapper
 from carla_model import CarlaModel
 from carla_agent import CarlaAgent
-from parl.algorithms import SAC
+from sac import SAC
 
 
-EVAL_EPISODES = 3
 GAMMA = 0.99
 TAU = 0.005
 ALPHA = 0.2  # determines the relative importance of entropy term against the reward
@@ -53,14 +52,14 @@ def main():
         'desired_speed': 15,  # desired speed (m/s)
         'max_ego_spawn_times': 100,  # maximum times to spawn ego vehicle
     }
-    env = gym.make('carla-v0', params=params)
-    env.seed(args.seed)
-    env = ActionMappingWrapper(env)
+    eval_env = gym.make('carla-v0', params=params)
+    eval_env.seed(args.seed)
+    eval_env = ActionMappingWrapper(eval_env)
 
-    obs_dim = self.env.state_space.shape[0]
-    action_dim = self.env.action_space.shape[0]
+    obs_dim = eval_env.state_space.shape[0]
+    action_dim = eval_env.action_space.shape[0]
 
-    # Initialize model, algorithm, agent
+    # Initialize model, algorithm
     model = CarlaModel(obs_dim, action_dim)
     algorithm = SAC(
         model,
@@ -70,12 +69,13 @@ def main():
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
     agent = CarlaAgent(algorithm)
+    # Restore agent
     agent.restore('./model.ckpt')
 
     # Evaluate episode
-    for _ in range(args.evaluate_episodes):
-        episode_reward = run_evaluate_episodes(agent, env)
-        tensorboard.add_scalar('eval/episode_reward', episode_reward, _)
+    for episode in range(args.evaluate_episodes):
+        episode_reward = run_evaluate_episodes(agent, eval_env)
+        tensorboard.add_scalar('eval/episode_reward', episode_reward, episode)
         logger.info('Evaluation episode reward: {}'.format(episode_reward))
 
 

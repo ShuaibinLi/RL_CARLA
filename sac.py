@@ -15,6 +15,15 @@ class SAC(parl.Algorithm):
                  alpha=None,
                  actor_lr=None,
                  critic_lr=None):
+        """ SAC algorithm
+            Args:
+                model(parl.Model): forward network of actor and critic.
+                gamma(float): discounted factor for reward computation
+                tau (float): decay coefficient when updating the weights of self.target_model with self.model
+                alpha (float): temperature parameter determines the relative importance of the entropy against the reward
+                actor_lr (float): learning rate of the actor model
+                critic_lr (float): learning rate of the critic model
+        """
         assert isinstance(gamma, float)
         assert isinstance(tau, float)
         assert isinstance(alpha, float)
@@ -24,8 +33,6 @@ class SAC(parl.Algorithm):
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
-        self.actor_lr = actor_lr
-        self.critic_lr = critic_lr
 
         self.model = model
         self.target_model = deepcopy(self.model)

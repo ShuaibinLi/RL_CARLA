@@ -30,4 +30,5 @@ class CarlaAgent(parl.Agent):
         reward = paddle.to_tensor(reward)
         next_obs = paddle.to_tensor(next_obs)
         terminal = paddle.to_tensor(terminal)
-        self.alg.learn(obs, action, reward, next_obs, terminal)
+        critic_loss, actor_loss = self.alg.learn(obs, action, reward, next_obs, terminal)
+        return critic_loss, actor_loss
