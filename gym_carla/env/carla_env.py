@@ -17,7 +17,6 @@ from gym import spaces
 from gym.utils import seeding
 import carla
 import cv2
-import torch
 
 from .coordinates import train_coordinates
 from .misc import _vec_decompose, delta_angle_between

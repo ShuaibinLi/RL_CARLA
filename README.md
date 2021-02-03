@@ -3,39 +3,40 @@
 Run SAC algorithm in Carla Environment with [PaddlePaddle](https://github.com/PaddlePaddle/Paddle)
 and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
 
-### System
-+ Ubuntu 16.04
-### Env
-+ Carla
-+ gym_carla
 ### SAC Algorithm
 > Paper: SAC in [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor](https://arxiv.org/abs/1801.01290)
 
 ### Benchmark result
 <img src=".benchmark/carla_sac.png" width = "800" height ="400" alt="carla_sac"/>
+<img src=".benchmark/Lane_bend.gif" width = "300" height ="200" alt="result"/>
 
 + Result was run with seed `0`, mode `Lane`
 
-### Installation
+## How to use
+### Dependencies:
++ System: Ubuntu 16.04
++ Simulator: [CARLA](https://github.com/carla-simulator/carla/releases/tag/0.9.6)
++ RL env: gym_carla
+### Installation 
 1. Create conda environment
     ```env
     $ conda create -n rl_carla python=3.6
     $ conda activate rl_carla
     ```
-2. Clone repository from [parl](https://github.com/PaddlePaddle/PARL)
-    ```clone
-    $ git clone https://github.com/ShuaibinLi/RL_CARLA.git
-    ```
-3. Install the packages
-    ```
-    $ pip install -r requirements.txt
-    $ pip install -e .
-    ```
-4. Download [CARLA_0.9.6](https://github.com/carla-simulator/carla/releases/tag/0.9.6), 
+2. Download [CARLA_0.9.6](https://github.com/carla-simulator/carla/releases/tag/0.9.6), 
    extract it to some folder, and add CARLA to `PYTHONPATH` environment variable
    ```
    $ export PYTHONPATH="SOMEFOLDER/CARLA_0.9.6/PythonAPI/carla/dist/carla-0.9.6-py3.5-linux-x86_64.egg:$PYTHONPATH"
    ```
+3. Clone repository from [this repo](https://github.com/ShuaibinLi/RL_CARLA.git)
+    ```clone
+    $ git clone https://github.com/ShuaibinLi/RL_CARLA.git
+    ```
+4. Install the packages
+    ```
+    $ pip install -r requirements.txt
+    $ pip install -e .
+    ```
 
 #### Start Training
 1. Enter the CARLA root folder, launch the CARLA server in different terminals 
@@ -53,7 +54,7 @@ and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
    + Three environments(2020,2021,2022) for collecting data and training, 
      one environment(2023) for evaluating.
      
-2. Open a new terminal and start [parl](https://github.com/PaddlePaddle/PARL) port for parallelization by
+2. Open a new terminal and start `PARL port` for parallelization by
    ```Parallelization
    $ xparl start --port 8765
    ```
@@ -66,3 +67,6 @@ and [parl](https://github.com/PaddlePaddle/PARL) for distributed training.
    # Train for other settings
    python train.py ----localhost [xparl address] --seed [int] --task_mode [mode]
    ```
+#### Load trained model
+```
+python evaluate.py

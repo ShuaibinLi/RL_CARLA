@@ -48,7 +48,7 @@ def main():
     logger.set_dir('./{}_{}'.format(args.env, args.seed))
 
     # envs for training
-    ports = [2020, 2021, 2022]
+    ports = [2021, 2023, 2025]
     parl.connect(args.localhost)
     env_list = [CarlaEnv(port=port) for port in ports]
 
@@ -58,7 +58,7 @@ def main():
         'dt': 0.025,  # time interval between two frames
         'ego_vehicle_filter':
         'vehicle.lincoln*',  # filter for defining ego vehicle
-        'port': 2023,  # connection port
+        'port': 2027,  # connection port
         'task_mode':
         'Lane',  # mode of the task, [random, roundabout (only for Town03)]
         'code_mode': 'test',
@@ -70,8 +70,8 @@ def main():
     env.seed(args.seed)
     env = ActionMappingWrapper(env)
 
-    obs_dim = self.env.state_space.shape[0]
-    action_dim = self.env.action_space.shape[0]
+    obs_dim = env.state_space.shape[0]
+    action_dim = env.action_space.shape[0]
 
     # Initialize model, algorithm, agent, replay_memory
     model = CarlaModel(obs_dim, action_dim)

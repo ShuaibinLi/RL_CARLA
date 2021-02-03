@@ -45,7 +45,7 @@ def main():
         'dt': 0.025,  # time interval between two frames
         'ego_vehicle_filter':
         'vehicle.lincoln*',  # filter for defining ego vehicle
-        'port': 2023,  # connection port
+        'port': 2027,  # connection port
         'task_mode':
         'Lane',  # mode of the task, [random, roundabout (only for Town03)]
         'code_mode': 'test',
