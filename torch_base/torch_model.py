@@ -1,16 +1,18 @@
 import parl
-import paddle
-import paddle.nn as nn
-import paddle.nn.functional as F
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 # clamp bounds for Std of action_log
 LOG_SIG_MAX = 2.0
 LOG_SIG_MIN = -20.0
 
+__all__ = ['TorchModel']
 
-class CarlaModel(parl.Model):
+
+class TorchModel(parl.Model):
     def __init__(self, obs_dim, action_dim):
-        super(CarlaModel, self).__init__()
+        super(TorchModel, self).__init__()
         self.actor_model = Actor(obs_dim, action_dim)
         self.critic_model = Critic(obs_dim, action_dim)
 
@@ -49,7 +51,7 @@ class Actor(parl.Model):
         act_std = F.relu(self.std_linear1(x))
         act_std = F.relu(self.std_linear2(act_std))
         act_std = self.std_linear(act_std)
-        act_log_std = paddle.clip(act_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
+        act_log_std = torch.clamp(act_std, min=LOG_SIG_MIN, max=LOG_SIG_MAX)
         return act_mean, act_log_std
 
 
@@ -72,7 +74,7 @@ class Critic(parl.Model):
         self.l10 = nn.Linear(256, 1)
 
     def forward(self, obs, action):
-        x = paddle.concat([obs, action], 1)
+        x = torch.cat([obs, action], 1)
 
         # Q1
         q1 = F.relu(self.l1(x))

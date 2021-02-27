@@ -1,15 +1,9 @@
-import gym
-import numpy as np
-import parl
 import argparse
-import carla
-import gym_carla
-from remote_env import ParallelEnv, LocalEnv
+import numpy as np
 from parl.utils import logger, tensorboard, ReplayMemory
-from parl.env.continuous_wrappers import ActionMappingWrapper
-from carla_model import CarlaModel
-from carla_agent import CarlaAgent
-from sac import SAC
+from env_utils import ParallelEnv, LocalEnv
+from torch_base import TorchModel, TorchSAC, TorchAgent
+from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 
 WARMUP_STEPS = 2e3
@@ -45,6 +39,7 @@ def main():
 
     # Parallel environments for training
     train_envs_params = EnvConfig['train_envs_params']
+    env_num = EnvConfig['env_num']
     env_list = ParallelEnv(args.env, args.xparl_addr, train_envs_params)
 
     # env for eval
@@ -55,6 +50,10 @@ def main():
     action_dim = eval_env.action_dim
 
     # Initialize model, algorithm, agent, replay_memory
+    if args.framework == 'torch':
+        CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
+    elif args.framework == 'paddle':
+        CarlaModel, SAC, CarlaAgent = PaddleModel, PaddleSAC, PaddleAgent
     model = CarlaModel(obs_dim, action_dim)
     algorithm = SAC(
         model,
@@ -78,7 +77,7 @@ def main():
         if rpm.size() < WARMUP_STEPS:
             action_list = [
                 np.random.uniform(-1, 1, size=action_dim)
-                for _ in range(len(train_envs_params))
+                for _ in range(env_num)
             ]
         else:
             action_list = [agent.sample(obs) for obs in obs_list]
@@ -86,7 +85,7 @@ def main():
             action_list)
 
         # Store data in replay memory
-        for i in range(len(train_envs_params)):
+        for i in range(env_num):
             rpm.append(obs_list[i], action_list[i], reward_list[i],
                        next_obs_list[i], done_list[i])
 
@@ -101,7 +100,8 @@ def main():
 
         # Save agent
         if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
-            agent.save('./model/step_{}_model.ckpt'.format(total_steps))
+            agent.save('./{}_model/step_{}_model.ckpt'.format(
+                args.framework, total_steps))
             last_save_steps = total_steps
 
         # Evaluate episode
@@ -123,6 +123,10 @@ if __name__ == "__main__":
         default='localhost:8080',
         help='xparl address for parallel training')
     parser.add_argument("--env", default="carla-v0")
+    parser.add_argument(
+        '--framework',
+        default='paddle',
+        help='choose deep learning framework: torch or paddle')
     parser.add_argument(
         "--train_total_steps",
         default=5e5,

@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-
 # set max_episode_steps according to task_mode
 # e.g. task_model   max_episode_steps
 #      Lane         250
@@ -57,10 +56,22 @@ temp_params['port'] = eval_port
 temp_params['code_mode'] = eval_code_mode
 eval_env_params = temp_params
 
+# test env params
+test_port = 2029
+test_code_mode = 'test'
+temp_params = deepcopy(params)
+temp_params['port'] = test_port
+temp_params['code_mode'] = test_code_mode
+test_env_params = temp_params
+
 EnvConfig = {
     # train envs config
     'train_envs_params': train_envs_params,
+    'env_num': len(train_envs_params),
 
     # eval env config
     'eval_env_params': eval_env_params,
+
+    # env config for evaluate.py
+    'test_env_params': test_env_params,
 }

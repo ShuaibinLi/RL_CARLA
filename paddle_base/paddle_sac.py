@@ -4,10 +4,11 @@ from paddle.distribution import Normal
 import paddle.nn.functional as F
 from copy import deepcopy
 
+__all__ = ['PaddleSAC']
 epsilon = 1e-6
 
 
-class SAC(parl.Algorithm):
+class PaddleSAC(parl.Algorithm):
     def __init__(self,
                  model,
                  gamma=None,

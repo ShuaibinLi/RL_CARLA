@@ -2,10 +2,12 @@ import parl
 import paddle
 import numpy as np
 
+__all__ = ['PaddleAgent']
 
-class CarlaAgent(parl.Agent):
+
+class PaddleAgent(parl.Agent):
     def __init__(self, algorithm):
-        super(CarlaAgent, self).__init__(algorithm)
+        super(PaddleAgent, self).__init__(algorithm)
 
         self.alg.sync_target(decay=0)
 
@@ -30,5 +32,6 @@ class CarlaAgent(parl.Agent):
         reward = paddle.to_tensor(reward)
         next_obs = paddle.to_tensor(next_obs)
         terminal = paddle.to_tensor(terminal)
-        critic_loss, actor_loss = self.alg.learn(obs, action, reward, next_obs, terminal)
+        critic_loss, actor_loss = self.alg.learn(obs, action, reward, next_obs,
+                                                 terminal)
         return critic_loss, actor_loss

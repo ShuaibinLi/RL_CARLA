@@ -1,15 +1,8 @@
-import gym
-import numpy as np
-import parl
 import argparse
-import carla
-import gym_carla
-from remote_env import LocalEnv
+from env_utils import LocalEnv
 from parl.utils import logger, tensorboard
-from parl.env.continuous_wrappers import ActionMappingWrapper
-from carla_model import CarlaModel
-from carla_agent import CarlaAgent
-from sac import SAC
+from torch_base import TorchModel, TorchSAC, TorchAgent
+from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 
 EVAL_EPISODES = 3
@@ -38,13 +31,17 @@ def main():
     logger.set_dir('./{}_eval'.format(args.env))
 
     # env for eval
-    eval_env_params = EnvConfig['eval_env_params']
+    eval_env_params = EnvConfig['test_env_params']
     eval_env = LocalEnv(args.env, eval_env_params)
 
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
 
     # Initialize model, algorithm, agent
+    if args.framework == 'torch':
+        CarlaModel, SAC, CarlaAgent = TorchModel, TorchSAC, TorchAgent
+    elif args.framework == 'paddle':
+        CarlaModel, SAC, CarlaAgent = PaddleModel, PaddleSAC, PaddleAgent
     model = CarlaModel(obs_dim, action_dim)
     algorithm = SAC(
         model,
@@ -54,7 +51,8 @@ def main():
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
     agent = CarlaAgent(algorithm)
-    agent.restore('./model.ckpt')
+    # restore trained agent
+    agent.restore('./{}'.format(args.restore_model))
 
     # Evaluate episode
     for episode in range(args.eval_episodes):
@@ -66,12 +64,20 @@ def main():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default="carla-v0")
-    parser.add_argument("--task_mode", default='Lane', help='mode of the task')
+    parser.add_argument(
+        '--framework',
+        default='paddle',
+        help='deep learning framework: torch or paddle')
     parser.add_argument(
         "--eval_episodes",
         default=10,
         type=int,
         help='max time steps to run environment')
+    parser.add_argument(
+        "--restore_model",
+        default='model.ckpt',
+        type=str,
+        help='restore saved model')
     args = parser.parse_args()
 
     main()

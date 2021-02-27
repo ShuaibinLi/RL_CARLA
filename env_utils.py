@@ -14,8 +14,9 @@ class ParallelEnv(object):
             CarlaRemoteEnv(env_name=env_name, params=params)
             for params in train_envs_params
         ]
-        self.episode_reward_list = [0] * len(self.env_list)
-        self.episode_steps_list = [0] * len(self.env_list)
+        self.env_num = len(self.env_list)
+        self.episode_reward_list = [0] * self.env_num
+        self.episode_steps_list = [0] * self.env_num
         self._max_episode_steps = train_envs_params[0]['max_time_episode']
         self.total_steps = 0
 
@@ -27,8 +28,7 @@ class ParallelEnv(object):
 
     def step(self, action_list):
         return_list = [
-            self.env_list[i].step(action_list[i])
-            for i in range(len(self.env_list))
+            self.env_list[i].step(action_list[i]) for i in range(self.env_num)
         ]
         return_list = [return_.get() for return_ in return_list]
         return_list = np.array(return_list, dtype=object)
@@ -39,7 +39,7 @@ class ParallelEnv(object):
         return self.next_obs_list, self.reward_list, self.done_list, self.info_list
 
     def get_obs(self):
-        for i in range(len(self.env_list)):
+        for i in range(self.env_num):
             self.total_steps += 1
             self.episode_steps_list[i] += 1
             self.episode_reward_list[i] += self.reward_list[i]

@@ -3,3 +3,5 @@ pygame==1.9.6
 opencv-python
 parl==1.4.1
 paddlepaddle-gpu
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch

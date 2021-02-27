@@ -1,6 +1,6 @@
 # RL_CARLA
 ## SAC in Carla simulator
-Based on [PARL](https://github.com/PaddlePaddle/PARL) and [PaddlePaddle](https://github.com/PaddlePaddle/Paddle), 
+Based on [PARL](https://github.com/PaddlePaddle/PARL) and Torch/Paddle(Baidu deep learning framework), 
 a parallel version of SAC was implemented and achieved high performance in the CARLA environment.
 > Paper: SAC in [Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor](https://arxiv.org/abs/1801.01290)
 
@@ -38,6 +38,7 @@ Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/t
     $ pip install -r requirements.txt
     $ pip install -e .
     ```
+   or you can install the package that you need by `pip/conda install [package name]`
 
 #### Start Training
 1. Open another(new) terminal, enter the CARLA root folder and launch CARLA service. 
@@ -63,6 +64,11 @@ Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/t
    ```train
    $ python train.py --xparl_addr localhost:8080
    ```
-#### Load trained model
-```
-python evaluate.py
+#### Evaluate trained agent
+ Open another(new) terminal, enter the CARLA root folder and launch CARLA service with display mode. 
+ ```start_test
+ $ ./CarlaUE4.sh -windowed -carla-port=2029
+ ```
+ Restore saved model to see performance.
+ ```
+ $ python evaluate.py --restore_model model.ckpt
