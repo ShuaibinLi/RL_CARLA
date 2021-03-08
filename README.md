@@ -35,7 +35,11 @@ Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/t
     ```
 4. Install the packages
     ```
+    ## install requirements
     $ pip install -r requirements.txt
+    
+    ## install gym env of carla
+    $ cd gym_carla
     $ pip install -e .
     ```
    or you can install the package that you need by `pip/conda install [package name]`
