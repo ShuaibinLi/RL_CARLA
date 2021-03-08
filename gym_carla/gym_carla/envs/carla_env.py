@@ -87,8 +87,6 @@ class CarlaEnv(gym.Env):
 
         while True:
             try:
-                # Clear sensor objects
-                # self.camera_sensor = None
                 self.collision_sensor = None
                 self.lane_sensor = None
 
