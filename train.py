@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 from parl.utils import logger, tensorboard, ReplayMemory
 from env_utils import ParallelEnv, LocalEnv
-from torch_base import TorchModel, TorchSAC, TorchAgent
+# from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
 from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 

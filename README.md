@@ -35,7 +35,9 @@ Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/t
     ```
 4. Install the packages
     ```
-    ## install requirements
+    ## install requirements，
+    ## Install paddle or torch wrt which base you are using(paddle or torch)
+    ## Make sure only one deep-learning framework exists in your conda_env during traing
     $ pip install -r requirements.txt
     
     ## install gym env of carla
