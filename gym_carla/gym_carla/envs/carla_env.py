@@ -50,8 +50,8 @@ class CarlaEnv(gym.Env):
 
         # Connect to carla server and get world object
         # print('connecting to Carla server...')
-        self._make_carla_client('localhost', self.port)
-
+        # self._make_carla_client('localhost', self.port)
+        self._make_carla_client('127.0.0.1', self.port)
         # Load routes
         self.starts, self.dests = train_coordinates(self.task_mode)
         self.route_deterministic_id = 0
@@ -226,8 +226,9 @@ class CarlaEnv(gym.Env):
 
                 return self._get_obs(), copy.deepcopy(self.state_info)
 
-            except:
+            except Exception as e:
                 self.logger.error("Env reset() error")
+                self.logger.error(e)
                 time.sleep(2)
                 self._make_carla_client('localhost', self.port)
 
@@ -248,7 +249,7 @@ class CarlaEnv(gym.Env):
             # TODO:[another kind of action] change the action space to [-2, 2]
             current_action = np.array(action) + self.last_action
             current_action = np.clip(
-                current_action, -1.0, 1.0, dtype=np.float32)
+                current_action, -1.0, 1.0)
             throttle_or_brake, steer = current_action
 
             if throttle_or_brake >= 0:
@@ -321,8 +322,9 @@ class CarlaEnv(gym.Env):
             return (self._get_obs(), current_reward, isDone,
                     copy.deepcopy(self.state_info))
 
-        except:
+        except Exception as e:
             self.logger.error("Env step() error")
+            self.logger.error(e)
             time.sleep(2)
             return (self._get_obs(), 0.0, True, copy.deepcopy(self.state_info))
 
@@ -531,6 +533,7 @@ class CarlaEnv(gym.Env):
         while True:
             try:
                 self.logger.info("connecting to Carla server...")
+                self.logger.info("Host: " + str(host) + " Port: " + str(port))
                 self.client = carla.Client(host, port)
                 self.client.set_timeout(10.0)
 
@@ -557,7 +560,8 @@ class CarlaEnv(gym.Env):
                 self.logger.info(
                     "Carla server port {} connected!".format(port))
                 break
-            except Exception:
+            except Exception as e:
+                self.logger.error(e)
                 self.logger.error(
                     'Fail to connect to carla-server...sleeping for 2')
                 time.sleep(2)

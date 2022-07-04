@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 from parl.utils import logger, tensorboard, ReplayMemory
 from env_utils import ParallelEnv, LocalEnv
-# from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
-from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
+from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
+#from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 
 WARMUP_STEPS = 2e3
@@ -91,19 +91,22 @@ def main():
 
         obs_list = env_list.get_obs()
         total_steps = env_list.total_steps
+        #logger.info('----------- Step 1 ------------')
         # Train agent after collecting sufficient data
         if rpm.size() >= WARMUP_STEPS:
             batch_obs, batch_action, batch_reward, batch_next_obs, batch_terminal = rpm.sample_batch(
                 BATCH_SIZE)
             agent.learn(batch_obs, batch_action, batch_reward, batch_next_obs,
                         batch_terminal)
-
+ 
+        #logger.info('----------- Step 2 ------------')
         # Save agent
         if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
             agent.save('./{}_model/step_{}_model.ckpt'.format(
                 args.framework, total_steps))
             last_save_steps = total_steps
-
+        
+        #logger.info('----------- Step 3 ------------')
         # Evaluate episode
         if (total_steps + 1) // args.test_every_steps >= test_flag:
             while (total_steps + 1) // args.test_every_steps >= test_flag:

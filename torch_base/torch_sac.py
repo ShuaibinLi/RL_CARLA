@@ -41,10 +41,12 @@ class TorchSAC(parl.Algorithm):
 
         self.model = model.to(device)
         self.target_model = deepcopy(self.model)
+        # self.actor_optimizer = torch.optim.Adam(
+        #     self.model.get_actor_params(), lr=actor_lr)
         self.actor_optimizer = torch.optim.Adam(
-            self.model.get_actor_params(), lr=actor_lr)
+            self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
-            self.model.get_critic_params(), lr=critic_lr)
+            self.model.critic_model.parameters(), lr=critic_lr)
 
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)

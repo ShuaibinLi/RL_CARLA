@@ -1,8 +1,10 @@
-gym==0.12.5
-pygame==1.9.6
+#gym==0.12.5
+#pygame==1.9.6
+gym
+pygame
 opencv-python
 parl
-paddlepaddle-gpu
+#paddlepaddle-gpu
 ##Install paddle or torch wrt which base you are using(paddle or torch)
 #--find-links https://download.pytorch.org/whl/torch_stable.html
-#torch
+torch
