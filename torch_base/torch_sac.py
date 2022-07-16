@@ -4,7 +4,9 @@ from torch.distributions import Normal
 import torch.nn.functional as F
 from copy import deepcopy
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 
 __all__ = ['TorchSAC']
 epsilon = 1e-6
@@ -32,14 +34,15 @@ class TorchSAC(parl.Algorithm):
         assert isinstance(alpha, float)
         assert isinstance(actor_lr, float)
         assert isinstance(critic_lr, float)
-
+        print("A" * 50)
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
-
+        print("B"*50)
         self.model = model.to(device)
+        print("D"*50)
         self.target_model = deepcopy(self.model)
         # self.actor_optimizer = torch.optim.Adam(
         #     self.model.get_actor_params(), lr=actor_lr)
@@ -47,7 +50,7 @@ class TorchSAC(parl.Algorithm):
             self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
-
+        print("C" * 50)
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)
         action = torch.tanh(act_mean)

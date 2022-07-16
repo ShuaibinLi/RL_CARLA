@@ -43,6 +43,7 @@ def main():
     elif args.framework == 'paddle':
         CarlaModel, SAC, CarlaAgent = PaddleModel, PaddleSAC, PaddleAgent
     model = CarlaModel(obs_dim, action_dim)
+    print("1" * 50)
     algorithm = SAC(
         model,
         gamma=GAMMA,
@@ -50,10 +51,12 @@ def main():
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
+    print("2" * 50)
     agent = CarlaAgent(algorithm)
+    print("3" * 50)
     # restore trained agent
     agent.restore('./{}'.format(args.restore_model))
-
+    print("Came Here")
     # Evaluate episode
     for episode in range(args.eval_episodes):
         episode_reward = run_episode(agent, eval_env)
