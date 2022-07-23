@@ -15,9 +15,14 @@ CRITIC_LR = 3e-4
 
 def run_episode(agent, env):
     episode_reward = 0.
+    print("Evaluate:", "run_episode", "env.reset()")
     obs = env.reset()
+    print("evaluate.py run_episode, obs:", obs)
     done = False
     steps = 0
+    print('=' * 50)
+    print("Observation:", obs)
+    print('=' * 50)
     while not done and steps < env._max_episode_steps:
         steps += 1
         action = agent.predict(obs)
@@ -36,6 +41,8 @@ def main():
 
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
+    print("Main Obs Dim:", obs_dim)
+    print("Main Action Dim:", action_dim)
 
     # Initialize model, algorithm, agent
     if args.framework == 'torch':

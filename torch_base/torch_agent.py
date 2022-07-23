@@ -8,7 +8,7 @@ __all__ = ['TorchAgent']
 class TorchAgent(parl.Agent):
     def __init__(self, algorithm):
         super(TorchAgent, self).__init__(algorithm)
-
+        print("TorchAgent Called")
         # self.device = torch.device("cuda" if torch.cuda.
         #                            is_available() else "cpu")
         print("E"*50)

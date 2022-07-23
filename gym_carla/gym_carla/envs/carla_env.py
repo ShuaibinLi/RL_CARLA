@@ -27,6 +27,7 @@ class CarlaEnv(gym.Env):
     """An OpenAI gym wrapper for CARLA simulator."""
 
     def __init__(self, params):
+        print("^" * 50, 'Came Here From Where', "^"*50)
         self.logger = setup_carla_logger(
             "output_logger", experiment_name=str(params['port']))
         self.logger.info("Env running in port {}".format(params['port']))
@@ -84,7 +85,7 @@ class CarlaEnv(gym.Env):
         self.distances = [1., 5., 10.]
 
     def reset(self):
-
+        print("carla_env.py reset function called")
         while True:
             try:
                 self.collision_sensor = None
@@ -223,7 +224,8 @@ class CarlaEnv(gym.Env):
                 # self.isSuccess = False
                 self.isOutOfLane = False
                 self.isSpecialSpeed = False
-
+                print("carla_env.py reset func, obs:", self._get_obs())
+                print("carla_env.py reset func, state_info:", self.state_info)
                 return self._get_obs(), copy.deepcopy(self.state_info)
 
             except Exception as e:
@@ -473,6 +475,21 @@ class CarlaEnv(gym.Env):
 
         Returns:
             Bool indicating whether the spawn is successful.
+        """
+        vehicle = self.world.spawn_actor(self.ego_bp, transform)
+        if vehicle is not None:
+            self.actors.append(vehicle)
+            self.ego = vehicle
+            return True
+        return False
+
+    def _try_spawn_vehicle_at(self, transform):
+        """Try to spawn traffic vehicles at specific transform
+
+        Args:
+            transform: the carla transform object
+        Returns:
+            Bool indicating whether spawn is successful
         """
         vehicle = self.world.spawn_actor(self.ego_bp, transform)
         if vehicle is not None:

@@ -29,6 +29,7 @@ class TorchSAC(parl.Algorithm):
                 actor_lr (float): learning rate of the actor model
                 critic_lr (float): learning rate of the critic model
         """
+        print("TorchSAC called")
         assert isinstance(gamma, float)
         assert isinstance(tau, float)
         assert isinstance(alpha, float)
@@ -51,8 +52,10 @@ class TorchSAC(parl.Algorithm):
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
         print("C" * 50)
+
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)
+        # print("Predicted Mean Action:", act_mean)
         action = torch.tanh(act_mean)
         return action
 

@@ -21,8 +21,11 @@ class ParallelEnv(object):
         self.total_steps = 0
 
     def reset(self):
+        print("env_utils.py:", "reset function")
         obs_list = [env.reset() for env in self.env_list]
+        print("Resetting Envs:", obs_list)
         obs_list = [obs.get() for obs in obs_list]
+        print("getting observations:", obs_list)
         self.obs_list = np.array(obs_list)
         return self.obs_list
 
@@ -63,13 +66,23 @@ class ParallelEnv(object):
 
 class LocalEnv(object):
     def __init__(self, env_name, params):
+        print("Local Env Called")
         self.env = gym.make(env_name, params=params)
+        print("4"*50, "env_utils.py")
         self.env = ActionMappingWrapper(self.env)
+        print("Low Bound:", self.env.low_bound)
+        print("High Bound:", self.env.high_bound)
         self._max_episode_steps = int(params['max_time_episode'])
+        print("Max Episodes:", self._max_episode_steps)
         self.obs_dim = self.env.state_space.shape[0]
+        print('State Space:', self.env.state_space)
+        print("Obs Dim:", self.obs_dim)
         self.action_dim = self.env.action_space.shape[0]
+        print('Action Space:', self.env.action_space)
+        print("Obs Dim:", self.action_dim)
 
     def reset(self):
+        print("env_utils.py reset")
         obs, _ = self.env.reset()
         return obs
 

@@ -1,0 +1,7 @@
+README.md
+setup.py
+gym_carla.egg-info/PKG-INFO
+gym_carla.egg-info/SOURCES.txt
+gym_carla.egg-info/dependency_links.txt
+gym_carla.egg-info/requires.txt
+gym_carla.egg-info/top_level.txt
