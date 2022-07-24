@@ -519,7 +519,7 @@ class CarlaEnv(gym.Env):
         # current_obs = self.camera_img[36:, :, :].copy()
         # return np.float32(current_obs / 255.0)
 
-        # [vec version]
+        # [vec version] # observation currently from waypoint vec, must change it to camera sensor to work with traffic
         return np.float32(self._info2normalized_state_vector())
 
     def _get_reward(self, action):
