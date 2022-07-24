@@ -28,7 +28,7 @@ params = {
     # maximum times to spawn ego vehicle
     'max_ego_spawn_times': 100,
     # maximum number of traffic vehicles
-    'max_traffic_vehicles': 5
+    'max_traffic_vehicles': 1
 }
 
 # train env params
@@ -78,4 +78,7 @@ EnvConfig = {
 
     # env config for evaluate.py
     'test_env_params': test_env_params,
+
+    # training context
+    'train_context': "traffic"
 }
