@@ -42,6 +42,7 @@ class CarlaEnv(gym.Env):
 
         self.desired_speed = params['desired_speed']
         self.max_ego_spawn_times = params['max_ego_spawn_times']
+        self.max_traffic_vehicles = params['max_traffic_vehicles']
 
         # action and observation space
         self.action_space = spaces.Box(
@@ -60,6 +61,10 @@ class CarlaEnv(gym.Env):
         # Create the ego vehicle blueprint
         self.ego_bp = self._create_vehicle_bluepprint(
             params['ego_vehicle_filter'], color='49,8,8')
+
+        # Create traffic vehicles (other than ego vehicles)
+        self.traffic_bp = self._create_vehicle_bluepprint(
+            params['traffic_vehicle_filter'], color='0,0,0')
 
         # Collision sensor
         self.collision_hist = []  # The collision history
@@ -131,7 +136,18 @@ class CarlaEnv(gym.Env):
                             start=self.start,
                             dest=self.dest,
                             transform=transform)
+
                     if self._try_spawn_ego_vehicle_at(transform):
+                        traffic_vehicles_spawned_index = 0
+                        while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
+                            transform_traffic = self._get_random_position_between(
+                                start=self.start,
+                                dest=self.dest,
+                                transform=transform
+                            )
+                            if self._try_spawn_vehicle_at(transform_traffic):
+                                traffic_vehicles_spawned_index += 1
+                            # print("*" * 50, "No of vehicles spawned:", traffic_vehicles_spawned_index, "*" * 50)
                         break
                     else:
                         ego_spawn_times += 1
@@ -352,6 +368,7 @@ class CarlaEnv(gym.Env):
 
         # If collides
         if len(self.collision_hist) > 0:
+            print("^" * 50, "Collision Happended!!!! Episode Done!!!", "^"*50)
             # print("Collision happened! Episode Done.")
             self.logger.debug(
                 'Collision happened! Episode cost %d steps in route %d.' %
@@ -491,10 +508,9 @@ class CarlaEnv(gym.Env):
         Returns:
             Bool indicating whether spawn is successful
         """
-        vehicle = self.world.spawn_actor(self.ego_bp, transform)
+        vehicle = self.world.spawn_actor(self.traffic_bp, transform)
         if vehicle is not None:
             self.actors.append(vehicle)
-            self.ego = vehicle
             return True
         return False
 
