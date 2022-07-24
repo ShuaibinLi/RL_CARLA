@@ -15,14 +15,14 @@ CRITIC_LR = 3e-4
 
 def run_episode(agent, env):
     episode_reward = 0.
-    print("Evaluate:", "run_episode", "env.reset()")
+    # print("Evaluate:", "run_episode", "env.reset()")
     obs = env.reset()
-    print("evaluate.py run_episode, obs:", obs)
+    # print("evaluate.py run_episode, obs:", obs)
     done = False
     steps = 0
-    print('=' * 50)
-    print("Observation:", obs)
-    print('=' * 50)
+    # print('=' * 50)
+    # print("Observation:", obs)
+    # print('=' * 50)
     while not done and steps < env._max_episode_steps:
         steps += 1
         action = agent.predict(obs)
@@ -41,8 +41,8 @@ def main():
 
     obs_dim = eval_env.obs_dim
     action_dim = eval_env.action_dim
-    print("Main Obs Dim:", obs_dim)
-    print("Main Action Dim:", action_dim)
+    # print("Main Obs Dim:", obs_dim)
+    # print("Main Action Dim:", action_dim)
 
     # Initialize model, algorithm, agent
     if args.framework == 'torch':
@@ -50,7 +50,7 @@ def main():
     elif args.framework == 'paddle':
         CarlaModel, SAC, CarlaAgent = PaddleModel, PaddleSAC, PaddleAgent
     model = CarlaModel(obs_dim, action_dim)
-    print("1" * 50)
+    # print("1" * 50)
     algorithm = SAC(
         model,
         gamma=GAMMA,
@@ -58,12 +58,12 @@ def main():
         alpha=ALPHA,
         actor_lr=ACTOR_LR,
         critic_lr=CRITIC_LR)
-    print("2" * 50)
+    # print("2" * 50)
     agent = CarlaAgent(algorithm)
-    print("3" * 50)
+    # print("3" * 50)
     # restore trained agent
     agent.restore('./{}'.format(args.restore_model))
-    print("Came Here")
+    # print("Came Here")
     # Evaluate episode
     for episode in range(args.eval_episodes):
         episode_reward = run_episode(agent, eval_env)

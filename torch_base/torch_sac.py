@@ -29,21 +29,21 @@ class TorchSAC(parl.Algorithm):
                 actor_lr (float): learning rate of the actor model
                 critic_lr (float): learning rate of the critic model
         """
-        print("TorchSAC called")
+        # print("TorchSAC called")
         assert isinstance(gamma, float)
         assert isinstance(tau, float)
         assert isinstance(alpha, float)
         assert isinstance(actor_lr, float)
         assert isinstance(critic_lr, float)
-        print("A" * 50)
+        # print("A" * 50)
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
-        print("B"*50)
+        # print("B"*50)
         self.model = model.to(device)
-        print("D"*50)
+        # print("D"*50)
         self.target_model = deepcopy(self.model)
         # self.actor_optimizer = torch.optim.Adam(
         #     self.model.get_actor_params(), lr=actor_lr)
@@ -51,7 +51,7 @@ class TorchSAC(parl.Algorithm):
             self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
-        print("C" * 50)
+        # print("C" * 50)
 
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)
