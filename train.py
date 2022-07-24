@@ -35,7 +35,7 @@ def run_evaluate_episodes(agent, env, eval_episodes):
 
 def main():
     logger.info("-----------------Carla_SAC-------------------")
-    logger.set_dir('./{}_train'.format(args.env))
+    logger.set_dir('./{args_env}_train_{train_context}'.format(args_env=args.env, train_context=EnvConfig['train_context']))
 
     # Parallel environments for training
     train_envs_params = EnvConfig['train_envs_params']
@@ -102,8 +102,8 @@ def main():
         #logger.info('----------- Step 2 ------------')
         # Save agent
         if total_steps > int(1e5) and total_steps > last_save_steps + int(1e4):
-            agent.save('./{}_model/step_{}_model.ckpt'.format(
-                args.framework, total_steps))
+            agent.save('./{model_framework}_model_{train_context}/step_{current_steps}_model.ckpt'.format(
+                model_framework=args.framework, current_steps=total_steps, train_context=EnvConfig['train_context']))
             last_save_steps = total_steps
         
         #logger.info('----------- Step 3 ------------')
