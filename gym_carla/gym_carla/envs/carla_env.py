@@ -71,6 +71,14 @@ class CarlaEnv(gym.Env):
         self.collision_hist_l = 1  # collision history length
         self.collision_bp = self.world.get_blueprint_library().find(
             'sensor.other.collision')
+        self.camera_bp = self.world.get_blueprint_library().find('sensor.camera.rgb')
+
+        self.camera_bp.set_attribute('image_size_x', '1920')
+        self.camera_bp.set_attribute('image_size_y', '1080')
+        self.camera_bp.set_attribute('fov', '110')
+        # Set the time in seconds between sensor captures
+        self.camera_bp.set_attribute('sensor_tick', '1.0')
+        # Provide the position of the sensor relative to the vehicle.
 
         # Set fixed simulation step for synchronous mode
         self.settings = self.world.get_settings()
@@ -160,6 +168,12 @@ class CarlaEnv(gym.Env):
                 self.collision_sensor.listen(
                     lambda event: get_collision_hist(event))
 
+                camera_transform = carla.Transform(carla.Location(x=0.8, z=1.7))
+                self.camera_sensor = self.world.spawn_actor(self.camera_bp, camera_transform, attach_to=self.ego)
+                self.actors.append(self.camera_sensor)
+                self.camera_sensor.listen(lambda data: get_camera_rgb_images(data))
+
+
                 def get_collision_hist(event):
                     impulse = event.normal_impulse
                     intensity = np.sqrt(impulse.x**2 + impulse.y**2 +
@@ -167,6 +181,13 @@ class CarlaEnv(gym.Env):
                     self.collision_hist.append(intensity)
                     if len(self.collision_hist) > self.collision_hist_l:
                         self.collision_hist.pop(0)
+
+                def get_camera_rgb_images(data):
+                    image_width = data.width
+                    image_height = data.height
+                    image_transform = data.transform
+                    field_of_view = data.fov
+                    raw_data = data.raw_data
 
                 self.collision_hist = []
 
