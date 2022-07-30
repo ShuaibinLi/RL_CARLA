@@ -138,7 +138,7 @@ class CarlaEnv(gym.Env):
                     if ego_spawn_times > self.max_ego_spawn_times:
                         self.reset()
                     transform = self._set_carla_transform(self.start)
-                    # Code_mode == train, spwan randomly between start and destination
+                    # Code_mode == train, spawn randomly between start and destination
                     if self.code_mode == 'train':
                         transform = self._get_random_position_between(
                             start=self.start,
@@ -146,6 +146,8 @@ class CarlaEnv(gym.Env):
                             transform=transform)
 
                     if self._try_spawn_ego_vehicle_at(transform):
+                        # code component to spawn traffic vehicles
+                        '''
                         traffic_vehicles_spawned_index = 0
                         while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
                             transform_traffic = self._get_random_position_between(
@@ -156,6 +158,7 @@ class CarlaEnv(gym.Env):
                             if self._try_spawn_vehicle_at(transform_traffic):
                                 traffic_vehicles_spawned_index += 1
                             # print("*" * 50, "No of vehicles spawned:", traffic_vehicles_spawned_index, "*" * 50)
+                        '''
                         break
                     else:
                         ego_spawn_times += 1
@@ -188,6 +191,9 @@ class CarlaEnv(gym.Env):
                     image_transform = data.transform
                     field_of_view = data.fov
                     raw_data = data.raw_data
+                    frame_id = data.frame
+                    print("IMG WIDTH:", image_width, "IMG HEIGHT:", image_height, "FRAME_ID:", frame_id)
+                    data.save_to_disk('image_outputs/%.6d.jpg' % data.frame)
 
                 self.collision_hist = []
 
