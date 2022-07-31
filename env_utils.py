@@ -101,30 +101,17 @@ class LocalEnv(object):
         # print("env_utils.py reset")
         obs, _, current_image = self.env.reset()
         if current_image:
-            print("FRAME IN RESET LOCAL ENV:", current_image.frame, "RAW DATA TYPE:", type(current_image.raw_data))
-            raw_data_bytes = current_image.raw_data.tobytes()
-            print("RAW BYTES DATA TYPE:", type(raw_data_bytes))
-            raw_np_array = np.frombuffer(raw_data_bytes, dtype=np.float32)
-            print("Indirect Method Array Dim:", raw_np_array.shape)
-            raw_np_array = np.asarray(current_image.raw_data)
-            print("Numpy array shape:", raw_np_array.shape)
-            reshaped_numpy_array = np.reshape(raw_np_array, (1080, -1, 3))
-            print("Reshaped Numpy Array Shape:", reshaped_numpy_array.shape)
-            # orig_image = Image.open('image_outputs/081623.jpg')
-            # np_orig_image = np.asarray(orig_image)
-            # print(np_orig_image.shape)
-
             numpy_rgb_image = self.to_rgb_array(current_image)
-            print("Direct Method Shape:", numpy_rgb_image.shape)
-
             plt.imshow(numpy_rgb_image)
             plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
         return obs
 
     def step(self, action):
         action_out, current_image = self.env.step(action)
-        # if current_image:
-        #     print("FRAME IN STEP LOCAL ENV:", current_image.frame)
+        if current_image:
+            numpy_rgb_image = self.to_rgb_array(current_image)
+            plt.imshow(numpy_rgb_image)
+            plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
         return action_out
 
 @parl.remote_class(wait=False)
