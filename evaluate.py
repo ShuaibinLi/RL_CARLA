@@ -17,7 +17,7 @@ def run_episode(agent, env):
     episode_reward = 0.
     # print("Evaluate:", "run_episode", "env.reset()")
     obs = env.reset()
-    # print("evaluate.py run_episode, obs:", obs)
+    print("evaluate.py run_episode, obs:", obs)
     done = False
     steps = 0
     # print('=' * 50)

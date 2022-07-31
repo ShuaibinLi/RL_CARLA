@@ -195,10 +195,8 @@ class CarlaEnv(gym.Env):
                     field_of_view = data.fov
                     raw_data = data.raw_data
                     frame_id = data.frame
-                    print("IMG WIDTH:", image_width, "IMG HEIGHT:", image_height, "FRAME_ID:", frame_id)
                     data.save_to_disk('image_outputs/%.6d.jpg' % data.frame)
                     self.current_image = data
-
 
                 self.collision_hist = []
 
@@ -275,16 +273,15 @@ class CarlaEnv(gym.Env):
                 # print("carla_env.py reset func, obs:", self._get_obs())
                 # print("carla_env.py reset func, state_info:", self.state_info)
                 # print("-" * 25, "Current Image Returned:", self.current_image.frame, "-" * 25)
-                return self._get_obs(), copy.deepcopy(self.state_info)
+                return self._get_obs(), copy.deepcopy(self.state_info), self.current_image
 
             except Exception as e:
                 self.logger.error("Env reset() error")
                 self.logger.error(e)
                 time.sleep(2)
-                self._make_carla_client('localhost', self.port)
+                self._make_carla_client('localhost', self.port), self.current_image
 
     def step(self, action):
-
         try:
             # Assign acc/steer/brake to action signal
             # Ver. 1 input is the value of control signal
@@ -370,14 +367,14 @@ class CarlaEnv(gym.Env):
             isDone = self._terminal()
             current_reward = self._get_reward(np.array(current_action))
 
-            return (self._get_obs(), current_reward, isDone,
-                    copy.deepcopy(self.state_info))
+            return ((self._get_obs(), current_reward, isDone,
+                    copy.deepcopy(self.state_info)), self.current_image)
 
         except Exception as e:
             self.logger.error("Env step() error")
             self.logger.error(e)
             time.sleep(2)
-            return (self._get_obs(), 0.0, True, copy.deepcopy(self.state_info))
+            return ((self._get_obs(), 0.0, True, copy.deepcopy(self.state_info)), self.current_image)
 
     def render(self, mode='human'):
         pass
@@ -551,7 +548,7 @@ class CarlaEnv(gym.Env):
         # [img version]
         # current_obs = self.camera_img[36:, :, :].copy()
         # return np.float32(current_obs / 255.0)
-
+        print("GET OBS CALLED")
         # [vec version] # observation currently from waypoint vec, must change it to camera sensor to work with traffic
         return np.float32(self._info2normalized_state_vector())
 

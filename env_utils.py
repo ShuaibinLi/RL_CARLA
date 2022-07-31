@@ -83,12 +83,16 @@ class LocalEnv(object):
 
     def reset(self):
         # print("env_utils.py reset")
-        obs, _ = self.env.reset()
+        obs, _, current_image = self.env.reset()
+        if current_image:
+            print("FRAME IN RESET LOCAL ENV:", current_image.frame)
         return obs
 
     def step(self, action):
-        return self.env.step(action)
-
+        action_out, current_image = self.env.step(action)
+        # if current_image:
+        #     print("FRAME IN STEP LOCAL ENV:", current_image.frame)
+        return action_out
 
 @parl.remote_class(wait=False)
 class CarlaRemoteEnv(object):
