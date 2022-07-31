@@ -97,6 +97,9 @@ class CarlaEnv(gym.Env):
         # Future distances to get heading
         self.distances = [1., 5., 10.]
 
+        # store current image
+        self.current_image = None
+
     def reset(self):
         # print("carla_env.py reset function called")
         while True:
@@ -194,6 +197,8 @@ class CarlaEnv(gym.Env):
                     frame_id = data.frame
                     print("IMG WIDTH:", image_width, "IMG HEIGHT:", image_height, "FRAME_ID:", frame_id)
                     data.save_to_disk('image_outputs/%.6d.jpg' % data.frame)
+                    self.current_image = data
+
 
                 self.collision_hist = []
 
@@ -269,6 +274,7 @@ class CarlaEnv(gym.Env):
                 self.isSpecialSpeed = False
                 # print("carla_env.py reset func, obs:", self._get_obs())
                 # print("carla_env.py reset func, state_info:", self.state_info)
+                # print("-" * 25, "Current Image Returned:", self.current_image.frame, "-" * 25)
                 return self._get_obs(), copy.deepcopy(self.state_info)
 
             except Exception as e:
