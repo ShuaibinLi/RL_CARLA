@@ -150,7 +150,7 @@ class CarlaEnv(gym.Env):
 
                     if self._try_spawn_ego_vehicle_at(transform):
                         # code component to spawn traffic vehicles
-                        '''
+
                         traffic_vehicles_spawned_index = 0
                         while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
                             transform_traffic = self._get_random_position_between(
@@ -161,7 +161,6 @@ class CarlaEnv(gym.Env):
                             if self._try_spawn_vehicle_at(transform_traffic):
                                 traffic_vehicles_spawned_index += 1
                             # print("*" * 50, "No of vehicles spawned:", traffic_vehicles_spawned_index, "*" * 50)
-                        '''
                         break
                     else:
                         ego_spawn_times += 1
