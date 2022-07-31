@@ -6,14 +6,16 @@ from faster_rcnn_model import create_model
 import matplotlib.pyplot as plt
 
 # set the computation device
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+device = "cpu"
 # load the model and the trained weights
 model = create_model(num_classes=5).to(device)
+print("1" * 50)
 model.load_state_dict(torch.load(
-    'outputs/model10.pth', map_location=device
+    'pretrained_model/model10.pth', map_location=device
 ))
 model.eval()
-
+print("2" * 50)
 # directory where all the images are present
 DIR_TEST = '/media/karthikragunath/Personal-Data/carla_6/RL_CARLA/data/test_data'
 test_images = glob.glob("{DIR_TEST}/*".format(DIR_TEST=DIR_TEST))
@@ -97,7 +99,7 @@ print(outputs)
 print('TEST PREDICTIONS COMPLETE')
 # cv2.destroyAllWindows()
 '''
-
+print("*" * 50, "Len of test data:", len(test_images), "*" * 50)
 for i in range(len(test_images)):
     # get the image file name for saving output later on
     image_name = test_images[i].split('/')[-1].split('.')[0]
@@ -110,7 +112,9 @@ for i in range(len(test_images)):
     # bring color channels to front
     image = np.transpose(image, (2, 0, 1)).astype(np.float64)
     # convert to tensor
-    image = torch.tensor(image, dtype=torch.float).cuda()
+    # image = torch.tensor(image, dtype=torch.float).cuda()
+    image = torch.tensor(image, dtype=torch.float)
+    image = image.to(device)
     # add batch dimension
     image = torch.unsqueeze(image, 0)
     with torch.no_grad():
