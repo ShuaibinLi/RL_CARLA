@@ -1,3 +1,5 @@
+import copy
+
 import parl
 import carla
 import gym
@@ -7,6 +9,7 @@ from parl.utils import logger, tensorboard
 from parl.env.continuous_wrappers import ActionMappingWrapper
 import matplotlib.pyplot as plt
 from PIL import Image
+from torch_base import DetectBoundingBox
 
 
 class ParallelEnv(object):
@@ -104,6 +107,9 @@ class LocalEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             plt.imshow(numpy_rgb_image)
             plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
+        #     print("$" * 25, "RESET Image Name:", str(current_image.frame), "$" * 25)
+        #     faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
+        #     faster_rcnn_obj.detect_bounding_boxes()
         return obs
 
     def step(self, action):
@@ -112,6 +118,9 @@ class LocalEnv(object):
             numpy_rgb_image = self.to_rgb_array(current_image)
             plt.imshow(numpy_rgb_image)
             plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
+            # print("$" * 25, "STEP Image Name:", str(current_image.frame), "$" * 25)
+            # faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
+            # faster_rcnn_obj.detect_bounding_boxes()
         return action_out
 
 @parl.remote_class(wait=False)
