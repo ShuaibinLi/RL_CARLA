@@ -5,6 +5,8 @@ import gym_carla
 import numpy as np
 from parl.utils import logger, tensorboard
 from parl.env.continuous_wrappers import ActionMappingWrapper
+import matplotlib.pyplot as plt
+from PIL import Image
 
 
 class ParallelEnv(object):
@@ -81,11 +83,42 @@ class LocalEnv(object):
         # print('Action Space:', self.env.action_space)
         # print("Obs Dim:", self.action_dim)
 
+    def to_bgra_array(self, image):
+        """Convert a CARLA raw image to a BGRA numpy array."""
+        array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
+        array = np.reshape(array, (image.height, image.width, 4))
+        return array
+
+    def to_rgb_array(self, image):
+        """Convert a CARLA raw image to a RGB numpy array."""
+        array = self.to_bgra_array(image)
+        # Convert BGRA to RGB.
+        array = array[:, :, :3]
+        array = array[:, :, ::-1]
+        return array
+
     def reset(self):
         # print("env_utils.py reset")
         obs, _, current_image = self.env.reset()
         if current_image:
-            print("FRAME IN RESET LOCAL ENV:", current_image.frame)
+            print("FRAME IN RESET LOCAL ENV:", current_image.frame, "RAW DATA TYPE:", type(current_image.raw_data))
+            raw_data_bytes = current_image.raw_data.tobytes()
+            print("RAW BYTES DATA TYPE:", type(raw_data_bytes))
+            raw_np_array = np.frombuffer(raw_data_bytes, dtype=np.float32)
+            print("Indirect Method Array Dim:", raw_np_array.shape)
+            raw_np_array = np.asarray(current_image.raw_data)
+            print("Numpy array shape:", raw_np_array.shape)
+            reshaped_numpy_array = np.reshape(raw_np_array, (1080, -1, 3))
+            print("Reshaped Numpy Array Shape:", reshaped_numpy_array.shape)
+            # orig_image = Image.open('image_outputs/081623.jpg')
+            # np_orig_image = np.asarray(orig_image)
+            # print(np_orig_image.shape)
+
+            numpy_rgb_image = self.to_rgb_array(current_image)
+            print("Direct Method Shape:", numpy_rgb_image.shape)
+
+            plt.imshow(numpy_rgb_image)
+            plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
         return obs
 
     def step(self, action):
