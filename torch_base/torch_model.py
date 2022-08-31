@@ -13,6 +13,7 @@ __all__ = ['TorchModel']
 class TorchModel(parl.Model):
     def __init__(self, obs_dim, action_dim):
         super(TorchModel, self).__init__()
+        # print("Torch Model Called")
         self.actor_model = Actor(obs_dim, action_dim)
         self.critic_model = Critic(obs_dim, action_dim)
 
