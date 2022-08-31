@@ -51,7 +51,6 @@ class TorchSAC(parl.Algorithm):
             self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
             self.model.critic_model.parameters(), lr=critic_lr)
-        # print("C" * 50)
 
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)
