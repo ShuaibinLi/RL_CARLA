@@ -528,6 +528,7 @@ class CarlaEnv(gym.Env):
         print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
+        print("all rewards:", r_speed + r_steer + r_action_regularized + r_lateral + r_step)
 
     def _make_carla_client(self, host, port):
         while True:
