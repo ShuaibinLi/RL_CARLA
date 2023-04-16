@@ -509,12 +509,12 @@ class CarlaEnv(gym.Env):
         speed_norm = np.linalg.norm(ego_velocity)
         delta_speed = speed_norm - self.desired_speed
         r_speed = -delta_speed**2 / 5.0
-        # print("r_speed:", speed_norm)
+        print("r_speed:", speed_norm)
 
         # reward for steer
         delta_yaw, _, _ = self._get_delta_yaw()
         r_steer = -100 * (delta_yaw * np.pi / 180)**2
-        # print("r_steer:", delta_yaw, '------>', r_steer)
+        print("r_steer:", delta_yaw, '------>', r_steer)
 
         # reward for action smoothness
         r_action_regularized = -5 * np.linalg.norm(action)**2
@@ -523,7 +523,7 @@ class CarlaEnv(gym.Env):
         # reward for lateral distance to the center of road
         lateral_dist = self.state_info['lateral_dist_t']
         r_lateral = -10.0 * lateral_dist**2
-        # print("r_lateral:", lateral_dist, '-------->', r_lateral)
+        print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
 
