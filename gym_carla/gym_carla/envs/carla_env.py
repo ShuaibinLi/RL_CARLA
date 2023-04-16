@@ -348,7 +348,7 @@ class CarlaEnv(gym.Env):
 
         # If collides
         if len(self.collision_hist) > 0:
-            # print("Collision happened! Episode Done.")
+            print("Collision happened! Episode Done.")
             self.logger.debug(
                 'Collision happened! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
@@ -357,7 +357,7 @@ class CarlaEnv(gym.Env):
 
         # If reach maximum timestep
         if self.time_step >= self.max_time_episode:
-            # print("Time out! Episode Done.")
+            print("Time out! Episode Done.")
             self.logger.debug('Time out! Episode cost %d steps in route %d.' %
                               (self.time_step, self.route_id))
             self.isTimeOut = True
@@ -366,7 +366,7 @@ class CarlaEnv(gym.Env):
         # If out of lane
         # if len(self.lane_invasion_hist) > 0:
         if abs(self.state_info['lateral_dist_t']) > 1.2:
-            # print("lane invasion happened! Episode Done.")
+            print("lane invasion happened! Episode Done.")
             if self.state_info['lateral_dist_t'] > 0:
                 self.logger.debug(
                     'Left Lane invasion! Episode cost %d steps in route %d.' %
@@ -382,12 +382,14 @@ class CarlaEnv(gym.Env):
         velocity = self.ego.get_velocity()
         v_norm = np.linalg.norm(np.array((velocity.x, velocity.y)))
         if v_norm < 4:
+            print("Speed too slow!")
             self.logger.debug(
                 'Speed too slow! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
             self.isSpecialSpeed = True
             return True
         elif v_norm > (1.5 * self.desired_speed):
+            print("Speed too fast!")
             self.logger.debug(
                 'Speed too fast! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
