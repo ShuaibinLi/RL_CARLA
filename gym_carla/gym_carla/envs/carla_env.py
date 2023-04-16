@@ -544,8 +544,9 @@ class CarlaEnv(gym.Env):
                     self.world = self.client.load_world('Town01')
                     # self.world = self.client.load_world('Town02')
                 elif self.task_mode == 'Lane':
-                    # self.world = self.client.load_world('Town01')
-                    self.world = self.client.load_world('Town05')
+                   # self.world = self.client.load_world('Town01')
+                    # self.world = self.client.load_world('Town05')
+                    self.world = self.client.load_world('Town02')
                 elif self.task_mode == 'U_curve':
                     self.world = self.client.load_world('Town03')
                 elif self.task_mode == 'Lane_test':
