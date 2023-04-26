@@ -336,15 +336,15 @@ class CarlaEnv(gym.Env):
     def _terminal(self):
         """Calculate whether to terminate the current episode."""
         # Get ego state
-        # ego_x, ego_y = self._get_ego_pos()
+        ego_x, ego_y = self._get_ego_pos()
 
         # # If at destination
-        # dest = self.dest
-        # if np.sqrt((ego_x-dest[0])**2+(ego_y-dest[1])**2) < 2.0:
-        #     # print("Get destination! Episode Done.")
-        #     self.logger.debug('Get destination! Episode cost %d steps in route %d.' % (self.time_step, self.route_id))
-        #     # self.isSuccess = True
-        #     return True
+        dest = self.dest
+        if np.sqrt((ego_x-dest[0])**2+(ego_y-dest[1])**2) < 2.0:
+            print("Cool! Get destination! Episode Done.")
+            self.logger.debug('Cool! Get destination! Episode cost %d steps in route %d.' % (self.time_step, self.route_id))
+            self.isSuccess = True
+            return True
 
         # If collides
         if len(self.collision_hist) > 0:
@@ -501,9 +501,9 @@ class CarlaEnv(gym.Env):
         if self.isCollided or self.isOutOfLane or self.isSpecialSpeed:
             r_done = -500.0
             return r_done
-        # if self.isSuccess:
-        #     r_done = 300.0
-        #     return r_done
+        if self.isSuccess:
+            r_done = 300.0
+            return r_done
 
         # reward for speed
         v = self.ego.get_velocity()
@@ -528,7 +528,7 @@ class CarlaEnv(gym.Env):
         print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
-        print("all rewards:", r_speed + r_steer + r_action_regularized + r_lateral + r_step)
+#         print("all rewards:", r_speed + r_steer + r_action_regularized + r_lateral + r_step)
 
     def _make_carla_client(self, host, port):
         while True:
