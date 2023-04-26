@@ -500,10 +500,27 @@ class CarlaEnv(gym.Env):
         r_step = 10.0
         if self.isCollided or self.isOutOfLane or self.isSpecialSpeed:
             r_done = -500.0
-            return r_done
+#             return r_done
+            return {
+                    'r_done': r_done,
+                    'step_reward': r_step,
+                    'speed_reward': 0.0,
+                    'steer_reward': 0.0,
+                    'action_reward': 0.0,
+                    'lateral_reward': 0.0,
+    }
+    }
         if self.isSuccess:
             r_done = 300.0
-            return r_done
+#             return r_done
+             return {
+                                'r_done': r_done,
+                                'step_reward': r_step,
+                                'speed_reward': 0.0,
+                                'steer_reward': 0.0,
+                                'action_reward': 0.0,
+                                'lateral_reward': 0.0,
+                }
 
         # reward for speed
         v = self.ego.get_velocity()
@@ -527,7 +544,15 @@ class CarlaEnv(gym.Env):
         r_lateral = -10.0 * lateral_dist**2
         print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
-        return r_speed + r_steer + r_action_regularized + r_lateral + r_step
+#         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
+        return {
+                    'r_done': 0.0,
+                    'step_reward': r_step,
+                    'speed_reward': r_speed,
+                    'steer_reward': r_steer,
+                    'action_reward': r_action_regularized,
+                    'lateral_reward': r_lateral
+                }
 #         print("all rewards:", r_speed + r_steer + r_action_regularized + r_lateral + r_step)
 
     def _make_carla_client(self, host, port):
