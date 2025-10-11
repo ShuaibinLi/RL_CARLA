@@ -78,3 +78,14 @@ Please see [Carla simulator](https://github.com/carla-simulator/carla/releases/t
  Restore saved model to see performance.
  ```
  $ python evaluate.py --restore_model model.ckpt
+ ```
+### Citation
+
+```bibtex
+@misc{2021SAC_CARLA,
+    title={RL_CARLA},
+    author={Shuaibin Li},
+    howpublished = {\url{https://github.com/ShuaibinLi/RL_CARLA}},
+    year={2021}
+}
+```
