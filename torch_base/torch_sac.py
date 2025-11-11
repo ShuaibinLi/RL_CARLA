@@ -4,7 +4,9 @@ from torch.distributions import Normal
 import torch.nn.functional as F
 from copy import deepcopy
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cpu"
 
 __all__ = ['TorchSAC']
 epsilon = 1e-6
@@ -27,20 +29,24 @@ class TorchSAC(parl.Algorithm):
                 actor_lr (float): learning rate of the actor model
                 critic_lr (float): learning rate of the critic model
         """
+        # print("TorchSAC called")
         assert isinstance(gamma, float)
         assert isinstance(tau, float)
         assert isinstance(alpha, float)
         assert isinstance(actor_lr, float)
         assert isinstance(critic_lr, float)
-
+        # print("A" * 50)
         self.gamma = gamma
         self.tau = tau
         self.alpha = alpha
         self.actor_lr = actor_lr
         self.critic_lr = critic_lr
-
+        # print("B"*50)
         self.model = model.to(device)
+        # print("D"*50)
         self.target_model = deepcopy(self.model)
+        # self.actor_optimizer = torch.optim.Adam(
+        #     self.model.get_actor_params(), lr=actor_lr)
         self.actor_optimizer = torch.optim.Adam(
             self.model.actor_model.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
@@ -48,6 +54,7 @@ class TorchSAC(parl.Algorithm):
 
     def predict(self, obs):
         act_mean, _ = self.model.policy(obs)
+        # print("Predicted Mean Action:", act_mean)
         action = torch.tanh(act_mean)
         return action
 

@@ -1,3 +1,5 @@
+import copy
+
 import parl
 import carla
 import gym
@@ -5,6 +7,9 @@ import gym_carla
 import numpy as np
 from parl.utils import logger, tensorboard
 from parl.env.continuous_wrappers import ActionMappingWrapper
+import matplotlib.pyplot as plt
+from PIL import Image
+from torch_base import DetectBoundingBox
 
 
 class ParallelEnv(object):
@@ -21,8 +26,11 @@ class ParallelEnv(object):
         self.total_steps = 0
 
     def reset(self):
+        # print("env_utils.py:", "reset function")
         obs_list = [env.reset() for env in self.env_list]
+        # print("Resetting Envs:", obs_list)
         obs_list = [obs.get() for obs in obs_list]
+        # print("getting observations:", obs_list)
         self.obs_list = np.array(obs_list)
         return self.obs_list
 
@@ -63,19 +71,57 @@ class ParallelEnv(object):
 
 class LocalEnv(object):
     def __init__(self, env_name, params):
+        # print("Local Env Called")
         self.env = gym.make(env_name, params=params)
+        # print("4"*50, "env_utils.py")
         self.env = ActionMappingWrapper(self.env)
+        # print("Low Bound:", self.env.low_bound)
+        # print("High Bound:", self.env.high_bound)
         self._max_episode_steps = int(params['max_time_episode'])
+        # print("Max Episodes:", self._max_episode_steps)
         self.obs_dim = self.env.state_space.shape[0]
+        # print('State Space:', self.env.state_space)
+        # print("Obs Dim:", self.obs_dim)
         self.action_dim = self.env.action_space.shape[0]
+        # print('Action Space:', self.env.action_space)
+        # print("Obs Dim:", self.action_dim)
+
+    def to_bgra_array(self, image):
+        """Convert a CARLA raw image to a BGRA numpy array."""
+        array = np.frombuffer(image.raw_data, dtype=np.dtype("uint8"))
+        array = np.reshape(array, (image.height, image.width, 4))
+        return array
+
+    def to_rgb_array(self, image):
+        """Convert a CARLA raw image to a RGB numpy array."""
+        array = self.to_bgra_array(image)
+        # Convert BGRA to RGB.
+        array = array[:, :, :3]
+        array = array[:, :, ::-1]
+        return array
 
     def reset(self):
-        obs, _ = self.env.reset()
+        # print("env_utils.py reset")
+        obs, _, current_image = self.env.reset()
+        if current_image:
+            numpy_rgb_image = self.to_rgb_array(current_image)
+            plt.imshow(numpy_rgb_image)
+            plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
+        #     print("$" * 25, "RESET Image Name:", str(current_image.frame), "$" * 25)
+        #     faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
+        #     faster_rcnn_obj.detect_bounding_boxes()
         return obs
 
     def step(self, action):
-        return self.env.step(action)
-
+        action_out, current_image = self.env.step(action)
+        if current_image:
+            numpy_rgb_image = self.to_rgb_array(current_image)
+            plt.imshow(numpy_rgb_image)
+            plt.savefig("carla_rgb_sensor_detected/" + str(current_image.frame) + '.png')
+            # print("$" * 25, "STEP Image Name:", str(current_image.frame), "$" * 25)
+            # faster_rcnn_obj = DetectBoundingBox(numpy_rgb_image, str(current_image.frame) + '.png')
+            # faster_rcnn_obj.detect_bounding_boxes()
+        return action_out
 
 @parl.remote_class(wait=False)
 class CarlaRemoteEnv(object):

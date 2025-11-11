@@ -27,6 +27,7 @@ class CarlaEnv(gym.Env):
     """An OpenAI gym wrapper for CARLA simulator."""
 
     def __init__(self, params):
+        # print("^" * 50, 'Came Here From Where', "^"*50)
         self.logger = setup_carla_logger(
             "output_logger", experiment_name=str(params['port']))
         self.logger.info("Env running in port {}".format(params['port']))
@@ -41,6 +42,7 @@ class CarlaEnv(gym.Env):
 
         self.desired_speed = params['desired_speed']
         self.max_ego_spawn_times = params['max_ego_spawn_times']
+        self.max_traffic_vehicles = params['max_traffic_vehicles']
 
         # action and observation space
         self.action_space = spaces.Box(
@@ -50,8 +52,8 @@ class CarlaEnv(gym.Env):
 
         # Connect to carla server and get world object
         # print('connecting to Carla server...')
-        self._make_carla_client('localhost', self.port)
-
+        # self._make_carla_client('localhost', self.port)
+        self._make_carla_client('127.0.0.1', self.port)
         # Load routes
         self.starts, self.dests = train_coordinates(self.task_mode)
         self.route_deterministic_id = 0
@@ -60,11 +62,23 @@ class CarlaEnv(gym.Env):
         self.ego_bp = self._create_vehicle_bluepprint(
             params['ego_vehicle_filter'], color='49,8,8')
 
+        # Create traffic vehicles (other than ego vehicles)
+        self.traffic_bp = self._create_vehicle_bluepprint(
+            params['traffic_vehicle_filter'], color='0,0,0')
+
         # Collision sensor
         self.collision_hist = []  # The collision history
         self.collision_hist_l = 1  # collision history length
         self.collision_bp = self.world.get_blueprint_library().find(
             'sensor.other.collision')
+        self.camera_bp = self.world.get_blueprint_library().find('sensor.camera.rgb')
+
+        self.camera_bp.set_attribute('image_size_x', '1920')
+        self.camera_bp.set_attribute('image_size_y', '1080')
+        self.camera_bp.set_attribute('fov', '110')
+        # Set the time in seconds between sensor captures
+        self.camera_bp.set_attribute('sensor_tick', '1.0')
+        # Provide the position of the sensor relative to the vehicle.
 
         # Set fixed simulation step for synchronous mode
         self.settings = self.world.get_settings()
@@ -83,8 +97,11 @@ class CarlaEnv(gym.Env):
         # Future distances to get heading
         self.distances = [1., 5., 10.]
 
-    def reset(self):
+        # store current image
+        self.current_image = None
 
+    def reset(self):
+        # print("carla_env.py reset function called")
         while True:
             try:
                 self.collision_sensor = None
@@ -124,13 +141,26 @@ class CarlaEnv(gym.Env):
                     if ego_spawn_times > self.max_ego_spawn_times:
                         self.reset()
                     transform = self._set_carla_transform(self.start)
-                    # Code_mode == train, spwan randomly between start and destination
+                    # Code_mode == train, spawn randomly between start and destination
                     if self.code_mode == 'train':
                         transform = self._get_random_position_between(
                             start=self.start,
                             dest=self.dest,
                             transform=transform)
+
                     if self._try_spawn_ego_vehicle_at(transform):
+                        # code component to spawn traffic vehicles
+
+                        traffic_vehicles_spawned_index = 0
+                        while traffic_vehicles_spawned_index < self.max_traffic_vehicles:
+                            transform_traffic = self._get_random_position_between(
+                                start=self.start,
+                                dest=self.dest,
+                                transform=transform
+                            )
+                            if self._try_spawn_vehicle_at(transform_traffic):
+                                traffic_vehicles_spawned_index += 1
+                            # print("*" * 50, "No of vehicles spawned:", traffic_vehicles_spawned_index, "*" * 50)
                         break
                     else:
                         ego_spawn_times += 1
@@ -143,6 +173,12 @@ class CarlaEnv(gym.Env):
                 self.collision_sensor.listen(
                     lambda event: get_collision_hist(event))
 
+                camera_transform = carla.Transform(carla.Location(x=0.8, z=1.7))
+                self.camera_sensor = self.world.spawn_actor(self.camera_bp, camera_transform, attach_to=self.ego)
+                self.actors.append(self.camera_sensor)
+                self.camera_sensor.listen(lambda data: get_camera_rgb_images(data))
+
+
                 def get_collision_hist(event):
                     impulse = event.normal_impulse
                     intensity = np.sqrt(impulse.x**2 + impulse.y**2 +
@@ -150,6 +186,16 @@ class CarlaEnv(gym.Env):
                     self.collision_hist.append(intensity)
                     if len(self.collision_hist) > self.collision_hist_l:
                         self.collision_hist.pop(0)
+
+                def get_camera_rgb_images(data):
+                    image_width = data.width
+                    image_height = data.height
+                    image_transform = data.transform
+                    field_of_view = data.fov
+                    raw_data = data.raw_data
+                    frame_id = data.frame
+                    data.save_to_disk('image_outputs/%.6d.jpg' % data.frame)
+                    self.current_image = data
 
                 self.collision_hist = []
 
@@ -223,16 +269,18 @@ class CarlaEnv(gym.Env):
                 # self.isSuccess = False
                 self.isOutOfLane = False
                 self.isSpecialSpeed = False
+                # print("carla_env.py reset func, obs:", self._get_obs())
+                # print("carla_env.py reset func, state_info:", self.state_info)
+                # print("-" * 25, "Current Image Returned:", self.current_image.frame, "-" * 25)
+                return self._get_obs(), copy.deepcopy(self.state_info), self.current_image
 
-                return self._get_obs(), copy.deepcopy(self.state_info)
-
-            except:
+            except Exception as e:
                 self.logger.error("Env reset() error")
+                self.logger.error(e)
                 time.sleep(2)
-                self._make_carla_client('localhost', self.port)
+                self._make_carla_client('localhost', self.port), self.current_image
 
     def step(self, action):
-
         try:
             # Assign acc/steer/brake to action signal
             # Ver. 1 input is the value of control signal
@@ -248,7 +296,7 @@ class CarlaEnv(gym.Env):
             # TODO:[another kind of action] change the action space to [-2, 2]
             current_action = np.array(action) + self.last_action
             current_action = np.clip(
-                current_action, -1.0, 1.0, dtype=np.float32)
+                current_action, -1.0, 1.0)
             throttle_or_brake, steer = current_action
 
             if throttle_or_brake >= 0:
@@ -318,13 +366,14 @@ class CarlaEnv(gym.Env):
             isDone = self._terminal()
             current_reward = self._get_reward(np.array(current_action))
 
-            return (self._get_obs(), current_reward, isDone,
-                    copy.deepcopy(self.state_info))
+            return ((self._get_obs(), current_reward, isDone,
+                    copy.deepcopy(self.state_info)), self.current_image)
 
-        except:
+        except Exception as e:
             self.logger.error("Env step() error")
+            self.logger.error(e)
             time.sleep(2)
-            return (self._get_obs(), 0.0, True, copy.deepcopy(self.state_info))
+            return ((self._get_obs(), 0.0, True, copy.deepcopy(self.state_info)), self.current_image)
 
     def render(self, mode='human'):
         pass
@@ -348,6 +397,7 @@ class CarlaEnv(gym.Env):
 
         # If collides
         if len(self.collision_hist) > 0:
+            # print("^" * 50, "Collision Happended!!!! Episode Done!!!", "^"*50)
             # print("Collision happened! Episode Done.")
             self.logger.debug(
                 'Collision happened! Episode cost %d steps in route %d.' %
@@ -479,12 +529,26 @@ class CarlaEnv(gym.Env):
             return True
         return False
 
+    def _try_spawn_vehicle_at(self, transform):
+        """Try to spawn traffic vehicles at specific transform
+
+        Args:
+            transform: the carla transform object
+        Returns:
+            Bool indicating whether spawn is successful
+        """
+        vehicle = self.world.spawn_actor(self.traffic_bp, transform)
+        if vehicle is not None:
+            self.actors.append(vehicle)
+            return True
+        return False
+
     def _get_obs(self):
         # [img version]
         # current_obs = self.camera_img[36:, :, :].copy()
         # return np.float32(current_obs / 255.0)
-
-        # [vec version]
+        print("GET OBS CALLED")
+        # [vec version] # observation currently from waypoint vec, must change it to camera sensor to work with traffic
         return np.float32(self._info2normalized_state_vector())
 
     def _get_reward(self, action):
@@ -531,6 +595,7 @@ class CarlaEnv(gym.Env):
         while True:
             try:
                 self.logger.info("connecting to Carla server...")
+                self.logger.info("Host: " + str(host) + " Port: " + str(port))
                 self.client = carla.Client(host, port)
                 self.client.set_timeout(10.0)
 
@@ -557,7 +622,8 @@ class CarlaEnv(gym.Env):
                 self.logger.info(
                     "Carla server port {} connected!".format(port))
                 break
-            except Exception:
+            except Exception as e:
+                self.logger.error(e)
                 self.logger.error(
                     'Fail to connect to carla-server...sleeping for 2')
                 time.sleep(2)
