@@ -336,19 +336,19 @@ class CarlaEnv(gym.Env):
     def _terminal(self):
         """Calculate whether to terminate the current episode."""
         # Get ego state
-        # ego_x, ego_y = self._get_ego_pos()
+        ego_x, ego_y = self._get_ego_pos()
 
         # # If at destination
-        # dest = self.dest
-        # if np.sqrt((ego_x-dest[0])**2+(ego_y-dest[1])**2) < 2.0:
-        #     # print("Get destination! Episode Done.")
-        #     self.logger.debug('Get destination! Episode cost %d steps in route %d.' % (self.time_step, self.route_id))
-        #     # self.isSuccess = True
-        #     return True
+        dest = self.dest
+        if np.sqrt((ego_x-dest[0])**2+(ego_y-dest[1])**2) < 2.0:
+            print("Cool! Get destination! Episode Done.")
+            self.logger.debug('Cool! Get destination! Episode cost %d steps in route %d.' % (self.time_step, self.route_id))
+            self.isSuccess = True
+            return True
 
         # If collides
         if len(self.collision_hist) > 0:
-            # print("Collision happened! Episode Done.")
+            print("Collision happened! Episode Done.")
             self.logger.debug(
                 'Collision happened! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
@@ -357,7 +357,7 @@ class CarlaEnv(gym.Env):
 
         # If reach maximum timestep
         if self.time_step >= self.max_time_episode:
-            # print("Time out! Episode Done.")
+            print("Time out! Episode Done.")
             self.logger.debug('Time out! Episode cost %d steps in route %d.' %
                               (self.time_step, self.route_id))
             self.isTimeOut = True
@@ -366,7 +366,7 @@ class CarlaEnv(gym.Env):
         # If out of lane
         # if len(self.lane_invasion_hist) > 0:
         if abs(self.state_info['lateral_dist_t']) > 1.2:
-            # print("lane invasion happened! Episode Done.")
+            print("lane invasion happened! Episode Done.")
             if self.state_info['lateral_dist_t'] > 0:
                 self.logger.debug(
                     'Left Lane invasion! Episode cost %d steps in route %d.' %
@@ -382,12 +382,14 @@ class CarlaEnv(gym.Env):
         velocity = self.ego.get_velocity()
         v_norm = np.linalg.norm(np.array((velocity.x, velocity.y)))
         if v_norm < 4:
+            print("Speed too slow!")
             self.logger.debug(
                 'Speed too slow! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
             self.isSpecialSpeed = True
             return True
         elif v_norm > (1.5 * self.desired_speed):
+            print("Speed too fast!")
             self.logger.debug(
                 'Speed too fast! Episode cost %d steps in route %d.' %
                 (self.time_step, self.route_id))
@@ -499,9 +501,9 @@ class CarlaEnv(gym.Env):
         if self.isCollided or self.isOutOfLane or self.isSpecialSpeed:
             r_done = -500.0
             return r_done
-        # if self.isSuccess:
-        #     r_done = 300.0
-        #     return r_done
+        if self.isSuccess:
+            r_done = 300.0
+            return r_done
 
         # reward for speed
         v = self.ego.get_velocity()
@@ -509,12 +511,12 @@ class CarlaEnv(gym.Env):
         speed_norm = np.linalg.norm(ego_velocity)
         delta_speed = speed_norm - self.desired_speed
         r_speed = -delta_speed**2 / 5.0
-        # print("r_speed:", speed_norm)
+        print("r_speed:", speed_norm)
 
         # reward for steer
         delta_yaw, _, _ = self._get_delta_yaw()
         r_steer = -100 * (delta_yaw * np.pi / 180)**2
-        # print("r_steer:", delta_yaw, '------>', r_steer)
+        print("r_steer:", delta_yaw, '------>', r_steer)
 
         # reward for action smoothness
         r_action_regularized = -5 * np.linalg.norm(action)**2
@@ -523,9 +525,10 @@ class CarlaEnv(gym.Env):
         # reward for lateral distance to the center of road
         lateral_dist = self.state_info['lateral_dist_t']
         r_lateral = -10.0 * lateral_dist**2
-        # print("r_lateral:", lateral_dist, '-------->', r_lateral)
+        print("r_lateral:", lateral_dist, '-------->', r_lateral)
 
         return r_speed + r_steer + r_action_regularized + r_lateral + r_step
+#         print("all rewards:", r_speed + r_steer + r_action_regularized + r_lateral + r_step)
 
     def _make_carla_client(self, host, port):
         while True:
@@ -544,8 +547,9 @@ class CarlaEnv(gym.Env):
                     self.world = self.client.load_world('Town01')
                     # self.world = self.client.load_world('Town02')
                 elif self.task_mode == 'Lane':
-                    # self.world = self.client.load_world('Town01')
-                    self.world = self.client.load_world('Town05')
+                   # self.world = self.client.load_world('Town01')
+                    # self.world = self.client.load_world('Town05')
+                    self.world = self.client.load_world('Town02')
                 elif self.task_mode == 'U_curve':
                     self.world = self.client.load_world('Town03')
                 elif self.task_mode == 'Lane_test':
