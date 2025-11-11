@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 from parl.utils import logger, tensorboard, ReplayMemory
 from env_utils import ParallelEnv, LocalEnv
-# from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
-from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
+from torch_base import TorchModel, TorchSAC, TorchAgent  # Choose base wrt which deep-learning framework you are using
+# from paddle_base import PaddleModel, PaddleSAC, PaddleAgent
 from env_config import EnvConfig
 
 WARMUP_STEPS = 2e3
@@ -125,7 +125,8 @@ if __name__ == "__main__":
     parser.add_argument("--env", default="carla-v0")
     parser.add_argument(
         '--framework',
-        default='paddle',
+#         default='paddle',
+        default='torch',
         help='choose deep learning framework: torch or paddle')
     parser.add_argument(
         "--train_total_steps",
